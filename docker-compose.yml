@@ -1,0 +1,52 @@
+services:
+  cartographyplaces.authapi:
+    image: ${DOCKER_REGISTRY-}cartographyplacesauthapi
+    ports:
+        - 5073:8080
+    depends_on:
+        - user.db
+    build:
+      context: .
+      dockerfile: CartographyPlaces.AuthAPI/Dockerfile
+
+  user.db:
+    image: postgres:latest
+    environment:
+        POSTGRES_USER: test
+        POSTGRES_PASSWORD: test
+        POSTGRES_DB: test
+    expose:
+        - 5432
+    restart: unless-stopped
+
+
+
+  cartographyplaces.photoapi:
+    image: ${DOCKER_REGISTRY-}cartographyplacesphotoapi
+    ports:
+        - 5072:8080
+    depends_on:
+        - photo.db
+    build:
+      context: .
+      dockerfile: CartographyPlaces.PhotoAPI/Dockerfile
+
+  photo.db:
+    image: postgres:latest
+    environment:
+        POSTGRES_USER: test
+        POSTGRES_PASSWORD: test
+        POSTGRES_DB: test
+    expose:
+        - 5432
+    restart: unless-stopped
+
+
+
+  webapi:
+    image: ${DOCKER_REGISTRY-}webapl
+    ports:
+        - 5071:8080
+    build:
+      context: .
+      dockerfile: webapl/Dockerfile

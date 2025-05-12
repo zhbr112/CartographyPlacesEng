@@ -1,0 +1,28 @@
+{
+  "projectPath": ".",
+  "outputPath": "aspirate-output",
+  "containerImageTags": [
+    "latest"
+  ],
+  "containerBuilder": "docker",
+  "outputFormat": "kustomize",
+  "skipFinalKustomizeGeneration": false,
+  "privateRegistryEmail": "aspir8@aka.ms",
+  "includeDashboard": true,
+  "useCustomNamespace": false,
+  "secrets": {
+    "salt": "1rSGkad3mVWONr9Z",
+    "hash": "GC2Fi46Y5b46jxxWMXfOC9H8OKLDHqPTdzQhbEUQF5E=",
+    "secrets": {
+      "user-db-password": {
+        "value": "1rSGkad3mVWONr9ZDgfppugd6pMQnuG5EvS5elzZXFjI8F0d852dQPPHJJdYQrzFBhM="
+      },
+      "user-db": {
+        "POSTGRES_PASSWORD": "1rSGkad3mVWONr9ZDgfppugd6pMQnuG5EvS5elzZXFjI8F0d852dQPPHJJdYQrzFBhM="
+      },
+      "auth-api": {
+        "ConnectionStrings__user-db": "1rSGkad3mVWONr9ZKcintC84Vr2r2B75g3LpWy38GX295lpZ0MKrQ5j/eZVDK\u002By8URQ3wFdRsvpVIQCK4f8P2nxtQHUOIyA3jbySgiPzOgqRzUPhDClGhclXzIwf4FZdWzcZqw=="
+      }
+    }
+  }
+}
