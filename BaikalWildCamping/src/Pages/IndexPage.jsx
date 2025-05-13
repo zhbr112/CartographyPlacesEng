@@ -110,7 +110,7 @@ export default function IndexPage() {
 
             // Fetch images for each place
             const imagePromises = temp.map(place =>
-                axios.get(`https://images.myapi.com/${place.id}`)
+                axios.get(`https://zhbr.1ffy.ru/photos/${place.id}`)
                     .then(imageRes => ({
                         ...place,
                         images: imageRes.data // Assuming the response is an array of image links
