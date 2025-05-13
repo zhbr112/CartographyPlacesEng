@@ -105,7 +105,8 @@ export default function IndexPage() {
                 latitude: data.place.latitude,
                 longitude: data.place.longitude,
                 tags: data.place.tags.map(tag => tags[tag]),
-                verified: data.place.verified
+                verified: data.place.verified,
+                images: ["https://media.istockphoto.com/id/1335247217/vector/loading-icon-vector-illustration.jpg?s=612x612&w=0&k=20&c=jARr4Alv-d5U3bCa8eixuX2593e1rDiiWnvJLgHCkQM="]
             }));
 
             // Fetch images for each place
@@ -120,6 +121,8 @@ export default function IndexPage() {
                         return { ...place, images: [] }; // Return place with empty images array on error
                     })
             );
+
+            setPlaces(temp);
 
             // Wait for all image requests to resolve
             Promise.all(imagePromises)
