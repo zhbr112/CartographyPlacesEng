@@ -6,7 +6,7 @@ import React from 'react'
 
 function Popup({ place: place, close: close }) {
     return (
-        <div className='bg-white rounded-3xl p-3 text-end'><Button className='rounded-full px-2 py-2' onClick={close}><Cross fill='white' className='mr-1 size-4 inline' /></Button><PlaceCard addedAt={place.addedAt} longitude={place.longitude} latitude={place.latitude} addedBy={place.author} imageUrl='https://baikal-1.ru/wp-content/uploads/2022/08/22-08-12-bbt1-5.jpeg' isVerified={place.verified} tags={place.tags} /></div>
+        <div className='bg-white rounded-3xl p-3 text-end'><Button className='rounded-full px-2 py-2' onClick={close}><Cross fill='white' className='mr-1 size-4 inline' /></Button><PlaceCard addedAt={place.addedAt} longitude={place.longitude} latitude={place.latitude} addedBy={place.author} imageUrl={place.images[0]} isVerified={place.verified} tags={place.tags} /></div>
     )
 }
 

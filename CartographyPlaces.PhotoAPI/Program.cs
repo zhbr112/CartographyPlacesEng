@@ -1,25 +1,27 @@
-using CartographyPlaces.AuthAPI.Data;
-using CartographyPlaces.PhotoAPI.Models;
-using Microsoft.EntityFrameworkCore;
-using TgAuthTest.Data;
+using System.Collections.Immutable;
+using Amazon.S3;
+using Amazon.S3.Model;
 using TgAuthTest;
+using TgAuthTest.Data;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
 var config = builder.Configuration;
 
 builder.Services.AddCors();
-
 builder.AddJwtAuth();
-
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddDbContext<PlacePhotoDbContext>(options => options.UseNpgsql(config.GetConnectionString("Postgres")));
-
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IAmazonS3>(_ =>
+{
+    var s3config = new AmazonS3Config
+    {
+        ServiceURL = config["S3:Url"],
+        ForcePathStyle = true,
+    };
 
-//builder.Services.AddScoped<IUserService, UserService>();
+    return new AmazonS3Client(config["S3:AccessKey"], config["S3:SecretKey"], s3config);
+});
 
 var app = builder.Build();
 
@@ -28,74 +30,45 @@ app.UseJwtAuth();
 app.UseCors(x => x
                     .AllowAnyMethod()
                     .AllowAnyHeader()
-                    .SetIsOriginAllowed(origin => true) // allow any origin
-                                                        //.WithOrigins("https://localhost:44351")); // Allow only this origin can also have multiple origins separated with comma
+                    .SetIsOriginAllowed(origin => true)
                     .AllowCredentials());
 
-app.MapPost("/add", async (Guid placeId, User user, HttpContext context, PlacePhotoDbContext db) =>
+app.MapPost("/add", async (Guid placeId, User user, IFormFileCollection files, IAmazonS3 s3) =>
 {
-    try
+    var largeFiles = files.Where(x => x.Length > config.GetValue<long>("Uploads:SizeLimitBytes")).Select(x => x.FileName).ToImmutableArray();
+    if (largeFiles.Length > 0) return Results.BadRequest(new { Message = "File too large", Files = largeFiles });
+
+    var uploadFiles = files.Select(x => new UploadPhoto(x, Guid.NewGuid()));  // Assign a unique UUID for each file.
+
+    await Parallel.ForEachAsync(uploadFiles, async (x, ct) =>
     {
-        // получем коллецию загруженных файлов
-        IFormFileCollection files = context.Request.Form.Files;
-        // путь к папке, где будут храниться файлы
-        var uploadPath = $"{Directory.GetCurrentDirectory()}/uploads";
-        // создаем папку для хранения файлов
-        Directory.CreateDirectory(uploadPath);
+        var f = File.Create("./image.jpeg");
+        await x.File.CopyToAsync(f);
+        f.Close();
 
-        // пробегаемся по всем файлам
-        var file = files[0];
-
-        // формируем путь к файлу в папке uploads
-
-
-        var placePhoto = new PlacePhoto
+        await s3.PutObjectAsync(new PutObjectRequest
         {
-            AddedBy = user.Id,
-            PlaceId = placeId,
-            FileName = file.FileName
-        };
+            BucketName = config["S3:ImageBucketName"],
+            Key = $"{placeId}/{x.AssignedId}{Path.GetExtension(x.File.FileName)}",
+            InputStream = x.File.OpenReadStream(),
+            ContentType = x.File.ContentType,
+            AutoCloseStream = true,
+            UseChunkEncoding = false
+        }, ct);
+    });
 
-        string fullPath = $"{uploadPath}/{placePhoto.Id}_{file.FileName}";
+    return Results.Ok();
+}).DisableAntiforgery();
 
-        // сохраняем файл в папку uploads
-        using (var fileStream = new FileStream(fullPath, FileMode.Create))
-        {
-            await file.CopyToAsync(fileStream);
-        }
-        await db.PlacePhoto.AddAsync(placePhoto);
-        await db.SaveChangesAsync();
-        return Results.Ok("Картинка добавлена");
-    }
-    catch (Exception ex)
+app.MapGet("/{placeId}", async (Guid placeId, IAmazonS3 s3) =>
+{
+    return (await s3.ListObjectsV2Async(new ListObjectsV2Request()
     {
-        return Results.NotFound(ex.Message);
-    }
-
-}).RequireAuthorization();
-
-app.MapGet("/{placeId}", async (Guid placeId, PlacePhotoDbContext db) =>
-{
-    var photos = await db.PlacePhoto.Where(x => x.PlaceId == placeId).ToListAsync()
-    ?? throw new ArgumentException("У этого места нет картинок");
-    var uploadPath = $"{Directory.GetCurrentDirectory()}/uploads";
-    string fullPath = $"{uploadPath}/{photos[0].Id}_{photos[0].FileName}";
-    return Results.File(fullPath);
-
-});
-
-app.MapGet("/test", async (PlacePhotoDbContext db) =>
-{
-    var photos = await db.PlacePhoto.ToListAsync();
-    return Results.Ok(config["Jwt:Audience"] + " hello");
-    //return Results.Ok(photos);
-});
-
-app.MapGet("/testt", async (PlacePhotoDbContext db) =>
-{
-    return Results.Ok(config["Jwt:Audience"]);
+        BucketName = config["S3:ImageBucketName"],
+        Prefix = placeId.ToString()
+    })).S3Objects?.Select(x => $"{config["S3:Url"]}/{config["S3:ImageBucketName"]}/{x.Key}") ?? [];
 });
 
 app.Run();
 
-public record class Photo(Guid Id, string FileName);
+public record class UploadPhoto(IFormFile File, Guid AssignedId);
