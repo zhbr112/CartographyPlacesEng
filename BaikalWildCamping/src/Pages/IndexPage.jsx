@@ -83,33 +83,51 @@ export default function IndexPage() {
     };
 
     useEffect(() => {
-        var params = new URLSearchParams({
+        let params = new URLSearchParams({
             longitude: 104.86,
             latitude: 51.72,
             radius: 1000,
             count: 1000,
         });
 
-        var uri = 'https://zhbr.1ffy.ru/places/get?' + params;
+        let uri = 'https://zhbr.1ffy.ru/places/get?' + params;
 
-        for (var i = 0; i < enabledTags.length; i++) {
+        for (let i = 0; i < enabledTags.length; i++) {
             uri += `&tags=${enabledTags[i]}`;
         }
 
         axios.get(uri).then(res => {
-            var temp = res.data.places.map(data => {
-                return {
-                    id: data.place.id,
-                    author: data.author,
-                    addedAt: new Date(Date.parse(data.place.addedAt)),
-                    latitude: data.place.latitude,
-                    longitude: data.place.longitude,
-                    tags: data.place.tags.map(tag => tags[tag]),
-                    verified: data.place.verified
-                };
-            });
-            setPlaces(temp);
-        }).catch(err => console.log(err));
+            // Map places to initial objects
+            let temp = res.data.places.map(data => ({
+                id: data.place.id,
+                author: data.author,
+                addedAt: new Date(Date.parse(data.place.addedAt)),
+                latitude: data.place.latitude,
+                longitude: data.place.longitude,
+                tags: data.place.tags.map(tag => tags[tag]),
+                verified: data.place.verified
+            }));
+
+            // Fetch images for each place
+            const imagePromises = temp.map(place =>
+                axios.get(`https://images.myapi.com/${place.id}`)
+                    .then(imageRes => ({
+                        ...place,
+                        images: imageRes.data // Assuming the response is an array of image links
+                    }))
+                    .catch(err => {
+                        console.log(`Error fetching images for place ${place.id}:`, err);
+                        return { ...place, images: [] }; // Return place with empty images array on error
+                    })
+            );
+
+            // Wait for all image requests to resolve
+            Promise.all(imagePromises)
+                .then(placesWithImages => {
+                    setPlaces(placesWithImages);
+                })
+                .catch(err => console.log('Error processing image requests:', err));
+        }).catch(err => console.log('Error fetching places:', err));
     }, [enabledTags])
 
     return (
