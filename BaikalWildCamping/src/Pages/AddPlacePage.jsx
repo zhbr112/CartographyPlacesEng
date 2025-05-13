@@ -13,57 +13,57 @@ export default function AddPlacePage() {
     var tags = [
         {
             id: 0,
-            name: 'питьевая вода',
+            name: 'fresh water',
             icon: TbBottle
         },
         {
             id: 1,
-            name: 'мобильная связь',
+            name: 'mobile connection',
             icon: PiCellTower
         },
         {
             id: 2,
-            name: 'костровище',
+            name: 'fire pit',
             icon: TbCampfire
         },
         {
             id: 3,
-            name: 'туалет',
+            name: 'restroom',
             icon: TbToiletPaper
         },
         {
             id: 4,
-            name: 'берег',
+            name: 'shore',
             icon: FaWater
         },
         {
             id: 5,
-            name: 'рыбалка',
+            name: 'fishing',
             icon: TbFish
         },
         {
             id: 6,
-            name: 'веломаршрут',
+            name: 'cycling',
             icon: TbBike
         },
         {
             id: 7,
-            name: 'платно',
+            name: 'fee',
             icon: PiHandCoins
         },
         {
             id: 8,
-            name: 'песок',
+            name: 'sand',
             icon: TbGrain
         },
         {
             id: 9,
-            name: 'камни',
+            name: 'rocks',
             icon: TbHexagons
         },
         {
             id: 10,
-            name: 'платформа',
+            name: 'platform',
             icon: TbBuildingBridge2
         },
     ];
@@ -74,7 +74,7 @@ export default function AddPlacePage() {
 
     function addPlace() {
         if (isNaN(longitude) || isNaN(latitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-            alert("неверные координаты");
+            alert("Incorrect location");
             return;
         }
 
@@ -115,23 +115,23 @@ export default function AddPlacePage() {
         <div className='w-full h-screen flex justify-center items-center'>
             <div className='w-1/4 flex flex-col gap-4 rounded-3xl p-5 bg-white text-left'>
                 <div>
-                    <p>Широта</p>
-                    <Input label="Широта" disabled={true} value={longitude} />
+                    <p>Latitude</p>
+                    <Input label="Latitude" disabled={true} value={longitude} />
                 </div>
                 <div>
-                    <p>Долгота</p>
-                    <Input label="Долгота" disabled={true} value={latitude} />
+                    <p>Longitude</p>
+                    <Input label="Longitude" disabled={true} value={latitude} />
                 </div>
                 <div>
-                    <p>Фотография</p>
+                    <p>Photos</p>
                     <Input id='photos' type="file" accept='.jpeg, .jpg, .png, image/jpeg image/png' />
                 </div>
                 <div>
-                    <p>Теги</p>
+                    <p>Tags</p>
                     <TagContainer tags={tags} setEnabledTags={setEnabledTags} />
                 </div>
                 <Button className='mt-5' onClick={addPlace}>
-                    Добавить
+                    Publish
                 </Button>
             </div>
         </div>

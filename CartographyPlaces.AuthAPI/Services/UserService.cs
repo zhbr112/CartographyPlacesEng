@@ -1,12 +1,12 @@
-﻿using CartographyPlaces.AuthAPI.Data;
-using CartographyPlaces.AuthAPI.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using CartographyPlaces.AuthAPI.Data;
+using CartographyPlaces.AuthAPI.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CartographyPlaces.AuthAPI.Services;
 
@@ -15,7 +15,7 @@ public class UserService(UserDbContext db, IHttpContextAccessor httpContextAcces
     private bool ValidateUser(User user, string Hash, int Auth_date)
     {
         if ((DateTime.UtcNow - DateTimeOffset.FromUnixTimeSeconds(Auth_date)
-            .DateTime).TotalHours > 24) throw new TimeoutException("Данные устарели");
+            .DateTime).TotalHours > 24) throw new TimeoutException("Outdated auth data");
 
         var dataCheckString = string.Join('\n',
             httpContextAccessor.HttpContext!.Request.Query
@@ -24,11 +24,11 @@ public class UserService(UserDbContext db, IHttpContextAccessor httpContextAcces
             .Select(x => $"{x.Key}={x.Value}"));
 
         var secretKey = SHA256.HashData(Encoding.UTF8.GetBytes(config["botToken"] ??
-            throw new ArgumentException("Нет botToken")));
+            throw new ArgumentException("No Telegram Bot Token specified")));
 
         if (!Convert.ToHexStringLower(HMACSHA256.HashData(secretKey,
             Encoding.UTF8.GetBytes(dataCheckString))).Equals(Hash))
-            throw new ValidationException("Данные не соответствуют хэшу");
+            throw new ValidationException("Hash mismatch");
 
         return true;
     }
@@ -51,13 +51,13 @@ public class UserService(UserDbContext db, IHttpContextAccessor httpContextAcces
         };
 
         var jwt = new JwtSecurityToken(
-                issuer: config["Jwt:Issuer"] ?? throw new ArgumentException("Нет issuer"),
-                audience: config["Jwt:Audience"] ?? throw new ArgumentException("Нет audience"),
+                issuer: config["Jwt:Issuer"] ?? throw new ArgumentException("No JWT Issuer specified"),
+                audience: config["Jwt:Audience"] ?? throw new ArgumentException("No JWT Audience specified"),
                 claims: claims,
                 expires: DateTime.UtcNow.Add(TimeSpan.FromDays(1)),
                 signingCredentials: new SigningCredentials(
                     new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Symkey"]
-                    ?? throw new ArgumentException("Нет Symkey"))),
+                    ?? throw new ArgumentException("No JWT Symmetric Key specified"))),
                     SecurityAlgorithms.HmacSha256));
         return jwt;
     }
@@ -65,7 +65,7 @@ public class UserService(UserDbContext db, IHttpContextAccessor httpContextAcces
     public async Task<User> GetUserAsync(long id)
     {
         var user = await db.Users.FirstOrDefaultAsync(x => x.Id.Equals(id))
-            ?? throw new ArgumentException("Такого пользователя не существует");
+            ?? throw new ArgumentException("No such user");
         return user;
     }
 }
