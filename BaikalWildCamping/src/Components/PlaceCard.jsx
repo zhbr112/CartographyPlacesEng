@@ -29,17 +29,17 @@ export default function PlaceCard({ longitude: longitude, latitude: latitude, ad
                     <div className='ml-1 flex items-center' style={{ lineHeight: '10px' }}>
                         {isVerified ? (<>
                             <TbRosetteDiscountCheck color='#0085FF' className='inline size-6 mr-1 align-baseline' />
-                            <p className='text-[#0085FF] font-semibold inline text-sm'>Верифицировано</p>
+                            <p className='text-[#0085FF] font-semibold inline text-sm'>Verified</p>
                         </>) : (<>
                             <TbRosetteDiscountOff color='#FCA600' className='inline size-6 mr-1 align-baseline' />
-                            <p className='text-amber-800 font-semibold inline text-sm'>Не верифицировано</p>
+                            <p className='text-amber-800 font-semibold inline text-sm'>Not verified</p>
                         </>)}
                     </div>
                     <div className='flex items-center mt-5'>
                         <img src={addedBy.photoUrl} className='inline ring-1 ring-gray-900 size-8 rounded-full' />
                         <p className='text-gray-900 text-lg font-semibold ml-2'>{addedBy.firstName}</p>
                     </div>
-                    <p className='text-xs font-light text-gray-800 mt-2'>Добавлено {("0" + addedAt.getDate()).slice(-2)}.{("0" + (addedAt.getMonth() + 1)).slice(-2)}.{addedAt.getFullYear()}</p>
+                    <p className='text-xs font-light text-gray-800 mt-2'>Added {("0" + addedAt.getDate()).slice(-2)}.{("0" + (addedAt.getMonth() + 1)).slice(-2)}.{addedAt.getFullYear()}</p>
                 </div>
             </div>
             <div className='w-full col-span-2 text-left my-0 mt-3 align-top'>
