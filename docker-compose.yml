@@ -43,7 +43,7 @@ services:
 
 
 
-  webapi:
+  PlacesAPI:
     image: ${DOCKER_REGISTRY-}webapl
     ports:
         - 5071:8080
