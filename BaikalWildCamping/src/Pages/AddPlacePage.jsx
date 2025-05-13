@@ -83,7 +83,7 @@ export default function AddPlacePage() {
             latitude: latitude
         });
 
-        var uri = 'https://zhbr.1ffy.ru/places/add?' + params;
+        var uri = 'https://baikal.1zq.ru/api/places/add?' + params;
 
         for (var i = 0; i < enabledTags.length; i++) {
             uri += `&tags=${enabledTags[i]}`;
@@ -100,7 +100,7 @@ export default function AddPlacePage() {
             var id = res.data.object.id;
 
             if (photo)
-                axios.post(`https://zhbr.1ffy.ru/photos/add?placeId=${id}`, photoFormData, {
+                axios.post(`https://baikal.1zq.ru/api/photos/add?placeId=${id}`, photoFormData, {
                     headers: { "Content-Type": "multipart/form-data" }
                 });
         }

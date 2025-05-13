@@ -32,7 +32,7 @@ export default function AppNavbar({ className: className = '' }) {
             params.delete(key);
         });
 
-        fetch('https://zhbr.1ffy.ru/user/login?' + params).then(async response => {
+        fetch('https://baikal.1zq.ru/api/user/login?' + params).then(async response => {
             if (response.status === 200) {
                 var res = await response.json();
                 //console.log(res);

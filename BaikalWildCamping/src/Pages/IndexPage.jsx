@@ -90,7 +90,7 @@ export default function IndexPage() {
             count: 1000,
         });
 
-        let uri = 'https://zhbr.1ffy.ru/places/get?' + params;
+        let uri = 'https://baikal.1zq.ru/api/places/get?' + params;
 
         for (let i = 0; i < enabledTags.length; i++) {
             uri += `&tags=${enabledTags[i]}`;
@@ -110,7 +110,7 @@ export default function IndexPage() {
 
             // Fetch images for each place
             const imagePromises = temp.map(place =>
-                axios.get(`https://zhbr.1ffy.ru/photos/${place.id}`)
+                axios.get(`https://baikal.1zq.ru/api/photos/${place.id}`)
                     .then(imageRes => ({
                         ...place,
                         images: imageRes.data // Assuming the response is an array of image links
