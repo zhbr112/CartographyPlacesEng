@@ -1,0 +1,13 @@
+#root {
+  max-height: 100vh;
+  overflow: hidden;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+@media screen and (max-width: 1500px) {
+  * {
+    font-size: 0.75em;
+  }
+}
